@@ -5,7 +5,7 @@ int main()
 {
 	while (true)
 	{
-		printf("我是被注入方.......\n");
+		printf("sleep.......\n");
 		Sleep(2000);
 	}
 

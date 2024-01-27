@@ -6,9 +6,9 @@
 class PETools
 {
 public:
-	//修复IAT表
+	//RepairIAT
 	VOID RepairIAT(IN LPVOID pImageBuffer);
-	//修正重定位表
+	//ReviseRelocation
 	VOID ReviseRelocation(IN LPVOID pImageBuffer, IN DWORD offset);
 };
 
