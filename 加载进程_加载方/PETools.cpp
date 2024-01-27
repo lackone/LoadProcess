@@ -283,33 +283,42 @@ VOID PETools::RepairIAT(IN LPVOID pFileBuffer)
 
 		//遍历FirstThunk
 		DWORD FirstThunkFoa = RvaToFoa(pFileBuffer, importDir->FirstThunk);
+		DWORD OriginalFirstThunkFoa = RvaToFoa(pFileBuffer, importDir->OriginalFirstThunk);
 
 		PIMAGE_THUNK_DATA32 FirstThunk = PIMAGE_THUNK_DATA32((LPBYTE)pFileBuffer + FirstThunkFoa);
+		PIMAGE_THUNK_DATA32 OriginalFirstThunk = PIMAGE_THUNK_DATA32((LPBYTE)pFileBuffer + OriginalFirstThunkFoa);
 
-		while (FirstThunk->u1.Ordinal)
+		while (OriginalFirstThunk->u1.Ordinal)
 		{
 			//判断最高位是不是1，如果是，则除去最高位的值，就是函数的导出序号
-			if ((FirstThunk->u1.Ordinal & 0x80000000) == 0x80000000)
+			if ((OriginalFirstThunk->u1.Ordinal & 0x80000000) == 0x80000000)
 			{
-				fn = GetProcAddress(hModule, (LPCSTR)(FirstThunk->u1.Ordinal & 0x7FFFFFFF));
+				fn = GetProcAddress(hModule, (LPCSTR)(OriginalFirstThunk->u1.Ordinal & 0x7FFFFFFF));
 				if (fn == NULL)
 				{
-					printf("加载函数%d失败\n", FirstThunk->u1.Ordinal & 0x7FFFFFFF);
+					printf("加载函数%d失败\n", OriginalFirstThunk->u1.Ordinal & 0x7FFFFFFF);
+				}
+				else {
+					printf("加载函数%d成功\n", OriginalFirstThunk->u1.Ordinal & 0x7FFFFFFF);
 				}
 			}
 			else {
-				PIMAGE_IMPORT_BY_NAME byname = PIMAGE_IMPORT_BY_NAME((LPBYTE)pFileBuffer + RvaToFoa(pFileBuffer, FirstThunk->u1.AddressOfData));
+				PIMAGE_IMPORT_BY_NAME byname = PIMAGE_IMPORT_BY_NAME((LPBYTE)pFileBuffer + RvaToFoa(pFileBuffer, OriginalFirstThunk->u1.AddressOfData));
 
 				fn = GetProcAddress(hModule, byname->Name);
 				if (fn == NULL)
 				{
 					printf("加载函数%s失败\n", byname->Name);
 				}
+				else {
+					printf("加载函数%s成功\n", byname->Name);
+				}
 			}
 
 			FirstThunk->u1.Function = (DWORD)fn;
 
 			FirstThunk++;
+			OriginalFirstThunk++;
 		}
 
 
